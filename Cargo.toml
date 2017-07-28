@@ -1,0 +1,10 @@
+[package]
+name = "kiri"
+version = "0.1.0"
+authors = ["Yuji Ichikawa <ichikawa.yuji@gmail.com>"]
+
+[dependencies]
+go_board = { path = 'go_board' }
+go_rule = { path = 'go_rule' }
+
+[workspace]

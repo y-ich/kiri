@@ -1,0 +1,9 @@
+[package]
+name = "go_rule"
+version = "0.1.0"
+authors = ["Yuji Ichikawa <ichikawa.yuji@gmail.com>"]
+
+[dependencies]
+rand     = "*"
+arrayvec = "*"
+go_board = { path = '../go_board' }
