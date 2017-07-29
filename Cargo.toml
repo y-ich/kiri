@@ -7,4 +7,7 @@ authors = ["Yuji Ichikawa <ichikawa.yuji@gmail.com>"]
 go_board = { path = 'go_board' }
 go_rule = { path = 'go_rule' }
 
+[profile.release]
+debug = true # これをつけるとInstrumentsのTime Profilerでソースコードのプロファイルができるらしいが、できなかった。
+
 [workspace]
