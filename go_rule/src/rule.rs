@@ -5,7 +5,7 @@ use go_board::*;
 pub struct MoveLog {
     turn: Color,
     ko: Option<usize>,
-    point: Move,
+    mov: Move,
     captives: UsizeVec,
 }
 
@@ -93,7 +93,7 @@ pub trait Rule : Board {
                 self.switch_turn();
                 Ok(MoveLog {
                     turn: self.get_turn(),
-                    point: Move::Pass,
+                    mov: Move::Pass,
                     ko: ko,
                     captives: UsizeVec::new(),
                 })
@@ -127,7 +127,7 @@ pub trait Rule : Board {
                 self.switch_turn();
                 Ok(MoveLog {
                     turn: self.get_turn(),
-                    point: Move::Linear(pt),
+                    mov: Move::Linear(pt),
                     ko: ko,
                     captives: captives,
                 })
@@ -167,14 +167,14 @@ pub trait Rule : Board {
     }
 
     /// 直前の着手を取り消します。
-    fn undo_play(&mut self, mov: &MoveLog) {
-        self.set_ko(mov.ko);
+    fn undo_play(&mut self, move_log: &MoveLog) {
+        self.set_ko(move_log.ko);
         self.switch_turn();
-        match mov.point {
+        match move_log.mov {
             Move::Linear(i) => {
                 self.set_state(i, PointState::Empty);
-                let opponent = mov.turn.opponent();
-                for &pt in &mov.captives {
+                let opponent = move_log.turn.opponent();
+                for &pt in &move_log.captives {
                     self.set_state(pt, PointState::Occupied(opponent));
                 }
             }
