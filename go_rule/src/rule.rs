@@ -139,7 +139,7 @@ pub trait Rule : Board {
     /// 線形座標ptの石によって取れる石を取り上げ、その座標の配列を返します。
     fn capture_by(&mut self, pt: usize) -> UsizeVec {
         debug_assert!(self.is_on_board(pt), "out of bounds: pt = {}", pt);
-        debug_assert!(!self.get_state(pt).is_stone(), "should placed stone: pt = {}", pt);
+        debug_assert!(self.get_state(pt).is_stone(), "should placed stone: pt = {}", pt);
 
         let opponent = self.get_turn().opponent();
         let mut captives = UsizeVec::new();
