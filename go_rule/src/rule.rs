@@ -60,8 +60,12 @@ pub trait Rule : Board {
     /// 盤上が正常な局面かチェックします。
     fn check_legal(&self) -> bool {
         for pt in self.all_points() {
-            if self.get_state(pt).is_stone() && self.string_at(pt).num_liberties() == 0 {
-                return false;
+            let mut string = GoString::new();
+            if self.get_state(pt).is_stone() {
+                self.string_at(pt, &mut string);
+                if string.num_liberties() == 0 {
+                    return false;
+                }
             }
         }
         true
@@ -81,7 +85,7 @@ pub trait Rule : Board {
     ///
     /// Markerインスタンスを使った実装を想定しているので、デフォルト実装がありません。
     /// 実装はposition.rsを参照してください。
-    fn string_at(&self, pt: usize) -> GoString;
+    fn string_at(&self, pt: usize, string: &mut GoString);
 
     /// 着手します。
     ///
@@ -108,9 +112,11 @@ pub trait Rule : Board {
                 // 石を置き、
                 self.set_state(pt, PointState::Occupied(turn));
                 // ハマを上げ、
-                let captives = self.capture_by(pt);
+                let mut captives = UsizeVec::new();
+                self.capture_by(pt, &mut captives);
                 // 自分のダメヅマリを調べる
-                let string = self.string_at(pt);
+                let mut string = GoString::new();
+                self.string_at(pt, &mut string);
                 let liberties = string.num_liberties();
                 if liberties == 0 { // 着手禁止点なら
                     // 着手を戻す
@@ -137,16 +143,16 @@ pub trait Rule : Board {
     }
 
     /// 線形座標ptの石によって取れる石を取り上げ、その座標の配列を返します。
-    fn capture_by(&mut self, pt: usize) -> UsizeVec {
-        debug_assert!(self.is_on_board(pt), "out of bounds: pt = {}", pt);
-        debug_assert!(!self.get_state(pt).is_stone(), "should placed stone: pt = {}", pt);
+    fn capture_by(&mut self, pt: usize, captives: &mut UsizeVec) {
+        debug_assert!(self.is_on_board(pt), "out of bounds: pt = {:?}", self.linear_to_xy(pt));
+        debug_assert!(self.get_state(pt).is_stone(), "should placed stone: pt = {:?}, {}", self.linear_to_xy(pt), self.get_state(pt));
 
         let opponent = self.get_turn().opponent();
-        let mut captives = UsizeVec::new();
 
         for &a in &self.adjacencies_at(pt) {
             if self.get_state(a) == PointState::Occupied(opponent) {
-                let string = self.string_at(a);
+                let mut string = GoString::new();
+                self.string_at(a, &mut string);
                 if string.num_liberties() == 0 {
                     self.remove_string(&string);
                     // TODO - 配列の結合だけどそれ用のメソッドがなく要素1つ1つ追加している。もっと速い方法あり？
@@ -156,7 +162,6 @@ pub trait Rule : Board {
                 }
             }
         }
-        captives
     }
 
     /// 連の石を盤上から取り上げます。

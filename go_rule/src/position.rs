@@ -110,12 +110,11 @@ macro_rules! make_position {
                 self.ko = pt;
             }
 
-            fn string_at(&self, pt: usize) -> GoString {
+            fn string_at(&self, pt: usize, string: &mut GoString) {
                 debug_assert!(self.is_on_board(pt), "pt = {}", pt);
                 let stone = self.get_state(pt);
                 let opponent = stone.opponent();
                 debug_assert!(stone.is_stone(), "no stones");
-                let mut string = GoString::new();
 
                 $marker_instance.with(|m| {
                     let mut marker = m.borrow_mut();
@@ -146,7 +145,6 @@ macro_rules! make_position {
                         index += 1;
                     }
                 });
-                string
             }
         }
 
