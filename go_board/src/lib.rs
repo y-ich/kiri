@@ -25,21 +25,24 @@
 //!
 //! # 使い方
 //! ```
+//! use std::fmt;
+//! use go_board::*;
+//!
 //! const BOARD_SIZE: usize = 15;
-//! const OB_SIZE = 1;
+//! const OB_SIZE: usize = 1;
 //! const ARRAY_SIZE: usize = array_size!(BOARD_SIZE, OB_SIZE);
 //! struct MyGoban {
 //!     turn: Color,
 //!     state: [PointState; ARRAY_SIZE],
 //! }
 //! impl Board for MyGoban {
-//!     fn get_width(&self) -> usize { BOARD_SIZE };
-//!     fn get_height(&self) -> usize { BOARD_SIZE };
-//!     fn get_ob_size(&self) -> usize { OB_SIZE };
-//!     fn get_state(&self, pt: usize) -> PointState { self.state[pt] };
-//!     fn set_state(&mut self, pt: usize, value: PointState) { self.state[pt] = value; };
-//!     fn get_turn(&self) -> Color { self.turn };
-//!     fn set_turn(&mut self, value: Color) { self.turn = value };
+//!     fn get_width(&self) -> usize { BOARD_SIZE }
+//!     fn get_height(&self) -> usize { BOARD_SIZE }
+//!     fn get_ob_size(&self) -> usize { OB_SIZE }
+//!     fn get_state(&self, pt: usize) -> PointState { self.state[pt] }
+//!     fn set_state(&mut self, pt: usize, value: PointState) { self.state[pt] = value; }
+//!     fn get_turn(&self) -> Color { self.turn }
+//!     fn set_turn(&mut self, value: Color) { self.turn = value }
 //! }
 //! impl fmt::Display for MyGoban {
 //!    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -163,5 +166,17 @@ impl fmt::Display for PointState {
             PointState::Occupied(Color::White)        => 'O',
             PointState::Out                           => '#',
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use ::*;
+
+    #[test]
+    fn test_point_state_size() {
+        use std::mem;
+        // TODO - 今の実装ではサイズは2。1に最適化できるようなコードを探す。
+        assert_eq!(1, mem::size_of::<PointState>());
     }
 }
