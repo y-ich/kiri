@@ -101,6 +101,13 @@ impl Color {
             Color::White => Color::Black,
         }
     }
+
+    pub fn to_pointstate(&self) -> PointState {
+        match *self {
+            Color::Black => PointState::Black,
+            Color::White => PointState::White,
+        }
+    }
 }
 
 impl fmt::Display for Color {
@@ -119,8 +126,10 @@ impl fmt::Display for Color {
 pub enum PointState {
     /// 空点です。
     Empty,
-    /// 石が存在しています。
-    Occupied(Color),
+    /// 黒石です。
+    Black,
+    /// 白石です。
+    White,
     /// 盤外です。
     Out,
     /// 着手禁止点です。
@@ -132,26 +141,26 @@ impl PointState {
     // TODO - Resultを使うべきか否か。
     pub fn opponent(&self) -> Self {
         match *self {
-            PointState::Occupied(c) => PointState::Occupied(c.opponent()),
-            _                       => PointState::Forbidden,
+            PointState::Black => PointState::White,
+            PointState::White => PointState::Black,
+            _                 => PointState::Forbidden,
         }
     }
 
     /// 石か否かを返します。
     #[inline]
     pub fn is_stone(&self) -> bool {
-        if let PointState::Occupied(_) = *self {
-            true
-        } else {
-            false
+        match *self {
+            PointState::Black | PointState::White => true,
+            _                                     => false,
         }
     }
 
     /// 文字に対応するPointStateを返します。
     pub fn from_char(c: char) -> PointState {
         match c {
-            'X' => PointState::Occupied(Color::Black),
-            'O' => PointState::Occupied(Color::White),
+            'X' => PointState::Black,
+            'O' => PointState::White,
             '#' => PointState::Out,
              _  => PointState::Empty,
         }
@@ -162,8 +171,8 @@ impl fmt::Display for PointState {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", match *self {
             PointState::Empty | PointState::Forbidden => '.',
-            PointState::Occupied(Color::Black)        => 'X',
-            PointState::Occupied(Color::White)        => 'O',
+            PointState::Black                         => 'X',
+            PointState::White                         => 'O',
             PointState::Out                           => '#',
         })
     }
@@ -176,7 +185,6 @@ mod tests {
     #[test]
     fn test_point_state_size() {
         use std::mem;
-        // TODO - 今の実装ではサイズは2。1に最適化できるようなコードを探す。
         assert_eq!(1, mem::size_of::<PointState>());
     }
 }

@@ -30,7 +30,7 @@ mod tests {
                 let mut i = start_index;
                 loop {
                     let pt = candidates[i];
-                    if game.is_eye(pt) != PointState::Occupied(game.get_turn()) {
+                    if game.is_eye(pt) != game.get_turn().to_pointstate() {
                         if let Ok(_) = game.play(Move::Linear(pt)) {
                             played = true;
                             break;
@@ -71,13 +71,13 @@ mod tests {
     fn test_is_eye() {
         let mut pos = Position19::new();
         let point = pos.xy_to_linear(1, 2);
-        pos.set_state(point, PointState::Occupied(Color::Black));
+        pos.set_state(point, PointState::Black);
         let point = pos.xy_to_linear(2, 1);
-        pos.set_state(point, PointState::Occupied(Color::Black));
+        pos.set_state(point, PointState::Black);
         println!("{}", pos);
         let point = pos.xy_to_linear(1, 1);
         println!("{}", pos.is_eye(point));
-        assert!(pos.is_eye(point) == PointState::Occupied(Color::Black));
+        assert!(pos.is_eye(point) == PointState::Black);
     }
 
     #[test]

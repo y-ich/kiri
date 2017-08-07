@@ -110,7 +110,7 @@ pub trait Rule : Board {
 
                 let turn = self.get_turn();
                 // 石を置き、
-                self.set_state(pt, PointState::Occupied(turn));
+                self.set_state(pt, turn.to_pointstate());
                 // ハマを上げ、
                 let mut captives = UsizeVec::new();
                 self.capture_by(pt, &mut captives);
@@ -150,7 +150,7 @@ pub trait Rule : Board {
         let opponent = self.get_turn().opponent();
 
         for &a in &self.adjacencies_at(pt) {
-            if self.get_state(a) == PointState::Occupied(opponent) {
+            if self.get_state(a) == opponent.to_pointstate() {
                 let mut string = GoString::new();
                 self.string_at(a, &mut string);
                 if string.num_liberties() == 0 {
@@ -180,7 +180,7 @@ pub trait Rule : Board {
                 self.set_state(i, PointState::Empty);
                 let opponent = move_log.turn.opponent();
                 for &pt in &move_log.captives {
-                    self.set_state(pt, PointState::Occupied(opponent));
+                    self.set_state(pt, opponent.to_pointstate());
                 }
             }
             _ => {},
@@ -247,9 +247,9 @@ pub trait Rule : Board {
             if c == PointState::Empty {
                 c = self.is_eye(pt);
             }
-            if c == PointState::Occupied(Color::Black) {
+            if c == PointState::Black {
                 s += 1;
-            } else if c == PointState::Occupied(Color::White) {
+            } else if c == PointState::White {
                 s -= 1;
             }
         }
