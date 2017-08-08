@@ -72,20 +72,24 @@ macro_rules! array_size {
     }
 }
 
+/// 盤上の交点の座標のタイプです。
+/// アクセスに本来必要な型はusizeですが、保持のサイズを優先してu16を使います。
+pub type LinearCoord = u16;
+
 /// 着手を表す列挙型です。
 //  TODO - enum使わずusizeで盤外の値をPass, Resignに割り当てたほうが速い。
-//         enumの読みやすさで、usizeに最適化される書き方を探す。
+//         enumの読みやすさで、LinearCoord/usizeに最適化される書き方を探す。
 pub enum Move {
     /// パスです。
     Pass,
     /// 投了です。
     Resign,
     /// 着手した交点の線形座標です。
-    Linear(usize),
+    Linear(LinearCoord),
 }
 
 /// 盤上の交点の可変長集合を扱うタイプです。
-pub type UsizeVec = ArrayVec<[usize; 384]>;
+pub type LinearCoordVec = ArrayVec<[LinearCoord; 384]>;
 
 /// 手番や石の色の列挙型です。
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]

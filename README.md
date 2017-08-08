@@ -7,6 +7,13 @@
 ### ベンチマーク
 19路盤でのランダムロールアウトの速度は、
 
+#### go_board version 0.1.1
+
+```
+cargo bench -p go_rule
+test tests::bench_rollout ... bench:   2,760,361 ns/iter (+/- 1,094,170)
+```
+
 #### go_rule version 0.1.2
 
 ```

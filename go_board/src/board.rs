@@ -1,6 +1,6 @@
 use std::ops::Range;
 use std::fmt;
-use ::{Color, PointState, UsizeVec, Move, BoardError};
+use ::{LinearCoord, Color, PointState, LinearCoordVec, Move, BoardError};
 
 /// Boardの具体的な構造体のfmt::Displayのための関数です。
 /// Boardを実装するtype Tでfmt::Displayを以下のように実装してください。
@@ -51,7 +51,7 @@ enum XyMove {
 /// 1 . . . . . . . . . . . . . . . . . .
 ///   A B C D E F G H J K L M N O P Q R S (Iは欠番)
 /// ```
-fn parse_algebraic(s: &str, height: usize) -> Result<XyMove, BoardError> {
+fn parse_algebraic(s: &str, height: LinearCoord) -> Result<XyMove, BoardError> {
     let st = s.to_uppercase();
 
     if st == "PASS" {
@@ -78,19 +78,19 @@ fn parse_algebraic(s: &str, height: usize) -> Result<XyMove, BoardError> {
 /// ゲームのルールは加味せず、基本的なもののみです。
 pub trait Board : fmt::Display {
     /// ボードの幅を返します。
-    fn get_width(&self) -> usize;
+    fn get_width(&self) -> LinearCoord;
 
     /// ボードの高さを返します。
-    fn get_height(&self) -> usize;
+    fn get_height(&self) -> LinearCoord;
 
     /// OB(Out of Bounds)領域の幅を返します。
-    fn get_ob_size(&self) -> usize;
+    fn get_ob_size(&self) -> LinearCoord;
 
     /// ptの状態を返します。
-    fn get_state(&self, pt: usize) -> PointState;
+    fn get_state(&self, pt: LinearCoord) -> PointState;
 
     /// ptの状態を設定します。
-    fn set_state(&mut self, pt: usize, value: PointState);
+    fn set_state(&mut self, pt: LinearCoord, value: PointState);
 
     /// 次の手番を返します。
     fn get_turn(&self) -> Color;
@@ -100,21 +100,21 @@ pub trait Board : fmt::Display {
 
     /// OB含めたボードの幅を返します。
     #[inline]
-    fn get_width_with_ob(&self) -> usize {
+    fn get_width_with_ob(&self) -> LinearCoord {
         self.get_width() + self.get_ob_size() * 2
     }
 
     /// xy座標をusizeに変換します。
     /// xy座標は(1,1)が原点で、左上が原点です。
-    fn xy_to_linear(&self, x: u8, y: u8) -> usize {
-        let x = x as usize;
-        let y = y as usize;
+    fn xy_to_linear(&self, x: u8, y: u8) -> LinearCoord {
+        let x = x as LinearCoord;
+        let y = y as LinearCoord;
         x + self.get_ob_size() - 1 + (y + self.get_ob_size() - 1) * self.get_width_with_ob()
     }
 
     /// usizeをxy座標に変換します。
     /// xy座標は(1,1)が原点で、左上が原点です。
-    fn linear_to_xy(&self, p: usize) -> (u8, u8) {
+    fn linear_to_xy(&self, p: LinearCoord) -> (u8, u8) {
         ((p % self.get_width_with_ob() - self.get_ob_size() + 1) as u8,
          (p / self.get_width_with_ob() - self.get_ob_size() + 1) as u8)
     }
@@ -129,19 +129,19 @@ pub trait Board : fmt::Display {
     /// 盤上の線形座標のRangeを返します。
     /// 盤外の線形座標も含みます。
     #[inline]
-    fn all_points(&self) -> Range<usize> {
+    fn all_points(&self) -> Range<LinearCoord> {
         self.xy_to_linear(1, 1)..self.xy_to_linear(self.get_width() as u8, self.get_height() as u8) + 1
     }
 
     /// 空点の配列を返します。
     #[inline]
-    fn empties(&self) -> UsizeVec {
+    fn empties(&self) -> LinearCoordVec {
         self.all_points().filter(|&pt| self.get_state(pt) == PointState::Empty).collect()
     }
 
     /// 盤上かチェックします。
     #[inline]
-    fn is_on_board(&self, pt: usize) -> bool {
+    fn is_on_board(&self, pt: LinearCoord) -> bool {
         self.get_state(pt) != PointState::Out
     }
 

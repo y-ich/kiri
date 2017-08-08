@@ -27,7 +27,7 @@ macro_rules! make_position {
             /// 次の手番
             turn: Color,
             /// コウによる着手禁止点
-            ko: Option<usize>,
+            ko: Option<LinearCoord>,
         }
 
         impl Clone for $name {
@@ -44,31 +44,31 @@ macro_rules! make_position {
 
         impl Board for $name {
             #[inline]
-            fn get_width(&self) -> usize {
+            fn get_width(&self) -> LinearCoord {
                 $size
             }
 
             #[inline]
-            fn get_height(&self) -> usize {
+            fn get_height(&self) -> LinearCoord {
                 $size
             }
 
             #[inline]
-            fn get_ob_size(&self) -> usize {
+            fn get_ob_size(&self) -> LinearCoord {
                 $ob_size
             }
 
             #[inline]
-            fn get_state(&self, pt: usize) -> PointState {
+            fn get_state(&self, pt: LinearCoord) -> PointState {
                 unsafe {
-                    *self.states.get_unchecked(pt)
+                    *self.states.get_unchecked(pt as usize)
                 }
             }
 
             #[inline]
-            fn set_state(&mut self, pt: usize, value: PointState) {
+            fn set_state(&mut self, pt: LinearCoord, value: PointState) {
                 unsafe {
-                    let elem = self.states.get_unchecked_mut(pt);
+                    let elem = self.states.get_unchecked_mut(pt as usize);
                     *elem = value;
                 }
             }
@@ -96,7 +96,7 @@ macro_rules! make_position {
             }
 
             #[inline]
-            fn is_ko(&self, pt: usize) -> bool {
+            fn is_ko(&self, pt: LinearCoord) -> bool {
                 match self.ko {
                     Some(i) => pt == i,
                     None    => false,
@@ -104,16 +104,16 @@ macro_rules! make_position {
             }
 
             #[inline]
-            fn get_ko(&self) -> Option<usize> {
+            fn get_ko(&self) -> Option<LinearCoord> {
                 self.ko
             }
 
             #[inline]
-            fn set_ko(&mut self, pt: Option<usize>) {
+            fn set_ko(&mut self, pt: Option<LinearCoord>) {
                 self.ko = pt;
             }
 
-            fn string_at(&self, pt: usize, string: &mut GoString) {
+            fn string_at(&self, pt: LinearCoord, string: &mut GoString) {
                 debug_assert!(self.is_on_board(pt), "pt = {}", pt);
                 let stone = self.get_state(pt);
                 debug_assert!(stone.is_stone(), "no stones");
@@ -125,15 +125,17 @@ macro_rules! make_position {
                     let mut index = 0;
                     while index < string.points.len() {
                         let pt = string.points[index];
-                        if !$marker_instance.is_marked(pt) {
-                            $marker_instance.mark(pt);
+                        let upt = pt as usize;
+                        if !$marker_instance.is_marked(upt) {
+                            $marker_instance.mark(upt);
                             for &a in &self.adjacencies_at(pt) {
-                                if !$marker_instance.is_marked(a) {
+                                let ua = a as usize;
+                                if !$marker_instance.is_marked(ua) {
                                     let state = self.get_state(a);
                                     if state == stone {
                                         string.points.push(a);
                                     } else {
-                                        $marker_instance.mark(a);
+                                        $marker_instance.mark(ua);
                                         if state == PointState::Empty {
                                             string.liberties.push(a);
                                         }
@@ -157,7 +159,7 @@ macro_rules! make_position {
             /// 内部状態をデフォルト値に設定します。
             fn reset(&mut self) {
                 for pt in 0..self.states.len() {
-                    self.set_state(pt, PointState::Out);
+                    self.set_state(pt as LinearCoord, PointState::Out);
                 }
                 for row in 1..self.get_height() + 1 {
                     for col in 1..self.get_width() + 1 {

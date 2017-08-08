@@ -4,16 +4,16 @@ use go_board::*;
 /// 着手のundoのための情報を保持する構造体です。
 pub struct MoveLog {
     turn: Color,
-    ko: Option<usize>,
+    ko: Option<LinearCoord>,
     mov: Move,
-    captives: UsizeVec,
+    captives: LinearCoordVec,
 }
 
 /// つながった石「連(String)」を表す構造体です。
 // TODO - インスタンス1つで4 * 384 * 3 = 4.6kB消費するのでなんとかしたほうがいいかもしれない。
 pub struct GoString {
-    pub points: UsizeVec,
-    pub liberties: UsizeVec,
+    pub points: LinearCoordVec,
+    pub liberties: LinearCoordVec,
 }
 
 impl GoString {
@@ -47,13 +47,13 @@ pub trait Rule : Board {
     fn set_komi(&mut self, value: f32);
 
     /// 線形座標ptの点がコウによる着手禁止点か調べます。
-    fn is_ko(&self, pt: usize) -> bool;
+    fn is_ko(&self, pt: LinearCoord) -> bool;
 
     /// コウによる着手禁止点を返します。
-    fn get_ko(&self) -> Option<usize>;
+    fn get_ko(&self) -> Option<LinearCoord>;
 
     /// コウによる着手禁止点を設定します。
-    fn set_ko(&mut self, pt: Option<usize>);
+    fn set_ko(&mut self, pt: Option<LinearCoord>);
 
     /// 盤上が正常な局面かチェックします。
     fn check_legal(&self) -> bool {
@@ -72,7 +72,7 @@ pub trait Rule : Board {
     /// 線形座標ptの点に隣接する点の配列を返します。
     /// 盤上か盤外かは未チェックです。
     #[inline]
-    fn adjacencies_at(&self, pt: usize) -> [usize; 4] {
+    fn adjacencies_at(&self, pt: LinearCoord) -> [LinearCoord; 4] {
         debug_assert!(self.is_on_board(pt), "pt = {}", pt);
         let width_plus_2 = self.get_width() + 2;
         // North East South  West
@@ -83,7 +83,7 @@ pub trait Rule : Board {
     ///
     /// Markerインスタンスを使った実装を想定しているので、デフォルト実装がありません。
     /// 実装はposition.rsを参照してください。
-    fn string_at(&self, pt: usize, string: &mut GoString);
+    fn string_at(&self, pt: LinearCoord, string: &mut GoString);
 
     /// 着手します。
     ///
@@ -97,7 +97,7 @@ pub trait Rule : Board {
                     turn: self.get_turn(),
                     mov: Move::Pass,
                     ko: ko,
-                    captives: UsizeVec::new(),
+                    captives: LinearCoordVec::new(),
                 })
             },
             Move::Linear(pt) => {
@@ -110,7 +110,7 @@ pub trait Rule : Board {
                 // 石を置き、
                 self.set_state(pt, turn.to_pointstate());
                 // ハマを上げ、
-                let mut captives = UsizeVec::new();
+                let mut captives = LinearCoordVec::new();
                 self.capture_by(pt, &mut captives);
                 // 自分のダメヅマリを調べる
                 let mut string = GoString::new();
@@ -141,7 +141,7 @@ pub trait Rule : Board {
     }
 
     /// 線形座標ptの石によって取れる石を取り上げ、その座標の配列を返します。
-    fn capture_by(&mut self, pt: usize, captives: &mut UsizeVec) {
+    fn capture_by(&mut self, pt: LinearCoord, captives: &mut LinearCoordVec) {
         debug_assert!(self.is_on_board(pt), "out of bounds: pt = {:?}", self.linear_to_xy(pt));
         debug_assert!(self.get_state(pt).is_stone(), "should placed stone: pt = {:?}, {}", self.linear_to_xy(pt), self.get_state(pt));
 
@@ -187,7 +187,7 @@ pub trait Rule : Board {
 
     /// ptに斜め隣接する位置の線形座標の配列を返します。
     #[inline]
-    fn diagonal_neighbors(&self, pt: usize) -> [usize; 4] {
+    fn diagonal_neighbors(&self, pt: LinearCoord) -> [LinearCoord; 4] {
         debug_assert!(self.is_on_board(pt), "pt = {}", pt);
         let width_plus_2 = self.get_width() + 2;
         //  NE  SE  SW  NW
@@ -196,7 +196,7 @@ pub trait Rule : Board {
 
     /// 眼形か否かを返します。
     /// 眼になり得ればtrue、それ以外(欠け目含む)はfalseを返します。
-    fn is_eye(&self, pt: usize) -> PointState {
+    fn is_eye(&self, pt: LinearCoord) -> PointState {
         debug_assert!(self.is_on_board(pt), "pt = {}, {:?}", pt, self.linear_to_xy(pt));
         let mut eyecolor = PointState::Empty;
         let mut other = PointState::Empty;

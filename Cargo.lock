@@ -2,8 +2,8 @@
 name = "kiri"
 version = "0.1.0"
 dependencies = [
- "go_board 0.1.0",
- "go_rule 0.1.1",
+ "go_board 0.1.1",
+ "go_rule 0.1.2",
 ]
 
 [[package]]
@@ -35,17 +35,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "go_board"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "arrayvec 0.3.23 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "go_rule"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "arrayvec 0.3.23 (registry+https://github.com/rust-lang/crates.io-index)",
- "go_board 0.1.0",
+ "go_board 0.1.1",
  "rand 0.3.16 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
