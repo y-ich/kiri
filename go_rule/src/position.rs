@@ -116,7 +116,6 @@ macro_rules! make_position {
             fn string_at(&self, pt: usize, string: &mut GoString) {
                 debug_assert!(self.is_on_board(pt), "pt = {}", pt);
                 let stone = self.get_state(pt);
-                let opponent = stone.opponent();
                 debug_assert!(stone.is_stone(), "no stones");
 
                 unsafe {
@@ -135,9 +134,7 @@ macro_rules! make_position {
                                         string.points.push(a);
                                     } else {
                                         $marker_instance.mark(a);
-                                        if state == opponent {
-                                            string.opponents.push(a);
-                                        } else if state == PointState::Empty {
+                                        if state == PointState::Empty {
                                             string.liberties.push(a);
                                         }
                                     }

@@ -14,7 +14,6 @@ pub struct MoveLog {
 pub struct GoString {
     pub points: UsizeVec,
     pub liberties: UsizeVec,
-    pub opponents: UsizeVec,
 }
 
 impl GoString {
@@ -22,7 +21,6 @@ impl GoString {
         GoString {
             points: ArrayVec::new(),
             liberties: ArrayVec::new(),
-            opponents: ArrayVec::new(),
         }
     }
 
