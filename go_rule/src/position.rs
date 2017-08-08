@@ -10,13 +10,11 @@ macro_rules! make_position {
         const $array: usize = array_size!($size, $ob_size);
         make_marker!($marker, $array);
 
-        use std::cell::RefCell;
         /// 共有Markerインスタンスです。
-        /// スレッド毎にシングルトンです。
-        thread_local! (
-            pub static $marker_instance: RefCell<$marker> = RefCell::new($marker::new())
-        );
-
+        pub static mut $marker_instance: $marker = $marker {
+            value: 0,
+            marks: [0; $array],
+        };
 
         /// 盤上の局面を表す構造体です。
         #[allow(dead_code)]
@@ -116,23 +114,22 @@ macro_rules! make_position {
                 let opponent = stone.opponent();
                 debug_assert!(stone.is_stone(), "no stones");
 
-                $marker_instance.with(|m| {
-                    let mut marker = m.borrow_mut();
-                    marker.clear();
+                unsafe {
+                    $marker_instance.clear();
 
                     string.points.push(pt);
                     let mut index = 0;
                     while index < string.points.len() {
                         let pt = string.points[index];
-                        if !marker.is_marked(pt) {
-                            marker.mark(pt);
+                        if !$marker_instance.is_marked(pt) {
+                            $marker_instance.mark(pt);
                             for &a in &self.adjacencies_at(pt) {
-                                if !marker.is_marked(a) {
+                                if !$marker_instance.is_marked(a) {
                                     let state = self.get_state(a);
                                     if state == stone {
                                         string.points.push(a);
                                     } else {
-                                        marker.mark(a);
+                                        $marker_instance.mark(a);
                                         if state == opponent {
                                             string.opponents.push(a);
                                         } else if state == PointState::Empty {
@@ -144,7 +141,7 @@ macro_rules! make_position {
                         }
                         index += 1;
                     }
-                });
+                }
             }
         }
 
