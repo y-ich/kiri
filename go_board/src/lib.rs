@@ -124,12 +124,12 @@ impl fmt::Display for Color {
 // TODO - きっとビットパターンで指定したほうが速くなる処理がある。読みやすさと速さの両立。
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum PointState {
-    /// 空点です。
-    Empty,
     /// 黒石です。
     Black,
     /// 白石です。
     White,
+    /// 空点です。
+    Empty,
     /// 盤外です。
     Out,
     /// 着手禁止点です。
