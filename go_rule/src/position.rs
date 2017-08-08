@@ -60,12 +60,17 @@ macro_rules! make_position {
 
             #[inline]
             fn get_state(&self, pt: usize) -> PointState {
-                self.states[pt]
+                unsafe {
+                    *self.states.get_unchecked(pt)
+                }
             }
 
             #[inline]
             fn set_state(&mut self, pt: usize, value: PointState) {
-                self.states[pt] = value;
+                unsafe {
+                    let elem = self.states.get_unchecked_mut(pt);
+                    *elem = value;
+                }
             }
 
             #[inline]
